@@ -83,9 +83,6 @@ target/
 # Jupyter Notebook
 .ipynb_checkpoints
 
-# pyenv
-.python-version
-
 # celery beat schedule file
 celerybeat-schedule
 
@@ -124,3 +121,10 @@ dump.rdb
 
 # playground files
 playground.py
+
+# docker files - supporting local development
+.docker
+docker-compose.yml
+
+Justfile
+.ruff_cache

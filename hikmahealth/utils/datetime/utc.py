@@ -1,8 +1,10 @@
 from datetime import timezone, datetime, UTC
-import dateutil
+from dateutil import parser
+
 
 def now():
     return datetime.now(tz=UTC)
+
 
 def from_unixtimestamp(unixtimestamp: int | str):
     try:
@@ -10,8 +12,10 @@ def from_unixtimestamp(unixtimestamp: int | str):
     except (ValueError, TypeError, OverflowError):
         return datetime.now(timezone.utc)
 
+
 def from_iso8601(dt_str: str):
-    return dateutil.parser.isoparse(dt_str).astimezone(tz=UTC)
+    return parser.isoparse(dt_str).astimezone(tz=UTC)
+
 
 def from_datetime(dt: datetime):
     """Normalizes the datetime input to a UTC datetime."""

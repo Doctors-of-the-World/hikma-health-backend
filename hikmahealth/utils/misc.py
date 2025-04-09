@@ -23,41 +23,41 @@ def to_snake_case(string):
         str: The input string converted to snake_case.
 
     Example:
-        >>> to_snake_case("camelCase")
+        >>> to_snake_case('camelCase')
         'camel_case'
-        >>> to_snake_case("PascalCase")
+        >>> to_snake_case('PascalCase')
         'pascal_case'
-        >>> to_snake_case("ABC")
+        >>> to_snake_case('ABC')
         'abc'
-        >>> to_snake_case("XMLHttpRequest")
+        >>> to_snake_case('XMLHttpRequest')
         'xml_http_request'
-        >>> to_snake_case("ThisIsATest")
+        >>> to_snake_case('ThisIsATest')
         'this_is_a_test'
     """
     if not string:
         return string
-        
+
     result = [string[0].lower()]
-    
+
     # Look at triplets: previous, current, and next character
     for i in range(1, len(string)):
         curr = string[i]
-        prev = string[i-1]
-        next_char = string[i+1] if i < len(string)-1 else None
-        
+        prev = string[i - 1]
+        next_char = string[i + 1] if i < len(string) - 1 else None
+
         # Add underscore if:
         # 1. Current char is uppercase and previous char is lowercase
         # 2. Current char is uppercase and next char is lowercase (for cases like 'ThisIsATest')
         # 3. Previous char is not underscore and not uppercase
         if curr.isupper() and (
-            (prev.isalnum() and not prev.isupper()) or
-            (next_char and next_char.islower())
+            (prev.isalnum() and not prev.isupper())
+            or (next_char and next_char.islower())
         ):
             if result[-1] != '_':
                 result.append('_')
-                
+
         result.append(curr.lower())
-            
+
     return ''.join(result)
 
 
@@ -89,14 +89,33 @@ def convert_dict_keys_to_snake_case(data):
     }
 
 
-def is_valid_uuid(uuid_to_test, version=4):
+# These are the list id uuid that are supported by the module
+SUPPORTED_UUID_VERSIONS = (1, 3, 4, 5)
+
+
+# TODO: check UUID version 1, 2, 4, 7. True when atleast on passes
+def get_uuid_version(id: str) -> int | None:
+    # 1 ... 8 | None
+    for version in SUPPORTED_UUID_VERSIONS:
+        try:
+            uuid_obj = UUID(id, version=version)
+        except ValueError:
+            continue
+
+        if str(uuid_obj) == id:
+            return version
+
+    return None
+
+
+def is_valid_uuid(uuid_to_test, version: int | None = None):
     """
     Check if uuid_to_test is a valid UUID.
 
      Parameters
     ----------
     uuid_to_test : str
-    version : {1, 2, 3, 4}
+    version : {1, 3, 4, 5}
 
      Returns
     -------
@@ -109,9 +128,11 @@ def is_valid_uuid(uuid_to_test, version=4):
     >>> is_valid_uuid('c9bf9e58')
     False
     """
-
     if not uuid_to_test:  # Handle None and empty string
         return False
+
+    if version is None:
+        return get_uuid_version(uuid_to_test) is not None
 
     try:
         uuid_obj = UUID(uuid_to_test, version=version)
@@ -137,18 +158,18 @@ def safe_json_dumps(data, default=None):
     try:
         return json.dumps(data)
     except (TypeError, ValueError, OverflowError) as e:
-        logging.warning(f"Failed to serialize to JSON. Using default value.")
+        logging.warning(f'Failed to serialize to JSON. Using default value.')
         return default
 
 
 def convert_operator(operator: str, case_insensitive: bool = True) -> str:
     """
     Convert frontend operator to SQL operator.
-    
+
     Args:
         operator (str): The frontend operator to convert.
         case_insensitive (bool): Whether to use case-insensitive operators where applicable. Defaults to True.
-    
+
     Returns:
         str: The corresponding SQL operator.
     """

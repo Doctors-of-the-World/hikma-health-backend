@@ -13,7 +13,7 @@ The platform is designed to be intuitive and allow for efficient patient workflo
 
 For more comprehensive documentation visit: https://docs.hikmahealth.org/
 
-> [!IMPORTANT]  
+> [!IMPORTANT]
 > This `main` branch has now become the default branch - migrating away from the `master` branch. This branch
 > is a complete re-write of the old branch to include core dependency upgrades, api structure updates, and a
 > refactor to reduce technical debt and improve organization. Migrating to this branch should be easy and
@@ -167,12 +167,19 @@ python3 -m pytest --cov=hikmahealth --cov-report=term-missing --cov-report=html
 Features on the roadmap represent the vision for the admin portal over the coming versions, but none are guaranteed. If there is a feature you would love to see supported, open a feature-request / issue with more details and we can prioritize features with the most requests.
 
 - [ ] Improve backup functionality for self-hosted options (not recommended - use a managed database service)
-- [ ] Add support for storing files and images
+- [x] Add support for storing files and images
+  - [x] [GCP - Cloud Storage](https://cloud.google.com/storage)
+  - [x] S3 / S3-Compatible Storage
+    - [x] [AWS - S3](https://aws.amazon.com/s3/)
+    - [x] [Tigrisdata](https://www.tigrisdata.com/) - S3-Compatible Object Storage
+  - [ ] Local (FS for self-hosted option) _Ideal for testing, Not Recommended_
 - [x] Remove all transition code from previous deployment (all old code now lives in `oldhikma` folder for reference. This will be deleted soon.)
 - [x] Add documentation for fully hosted solutions like render.com
 - [x] Improve test coverage
   - [ ] 80% test coverage
 - [x] Add docs to deploy button customization
+- [ ] Add docs on configuring custom `server_variables`
+- [ ] Add docs on configuring blob storage options
 
 ## Contributing
 
