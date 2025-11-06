@@ -1709,6 +1709,7 @@ def import_full_database(_):
         'patient_additional_attributes': ['metadata'],
         'visits': ['metadata'],
         'appointments': ['metadata'],
+        'clinics': ['metadata'],
     }
 
     # Define primary key constraints for each table
