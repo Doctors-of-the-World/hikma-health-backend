@@ -1,15 +1,13 @@
+from hikmahealth.storage.adapters import base
+
 """Providing adapters and resource support S3-compatible storages"""
 
 import dataclasses
 from io import BytesIO
 
-from botocore.client import Config
 from hikmahealth.server.client.keeper import Keeper
 from hikmahealth.storage.adapters.base import BaseAdapter
-from dataclasses import _MISSING_TYPE, dataclass
 
-import asyncio
-import boto3
 
 from hikmahealth.storage.objects import PutOutput
 
@@ -29,8 +27,8 @@ DEFAULT_BUCKET_NAME = 'hikmahealth-s3'
 is may be defaully created if the value was ever missing"""
 
 
-@dataclass
-class StoreConfig:
+@dataclasses.dataclass
+class StoreConfig(base.BaseConfig):
     AWS_ACCESS_KEY_ID: str
     AWS_SECRET_ACCESS_KEY: str
 
@@ -46,6 +44,10 @@ class StoreConfig:
     # required to be defined if not using a
     # native S3 bucket
     S3_BUCKET_NAME: str | None = None
+
+    @property
+    def secret_fields(self):
+        return ['AWS_SECRET_ACCESS_KEY', 'AWS_ACCESS_KEY_ID']
 
 
 def initialize_store_config_from_keeper(kp: Keeper):
@@ -74,9 +76,12 @@ def initialize_store_config_from_keeper(kp: Keeper):
     return StoreConfig(**config)
 
 
+UNIQUE_STORE_NAME = 's3'
+
+
 class S3Store(BaseAdapter):
     def __init__(self, boto3_client, bucket_name: str, host: str):
-        super().__init__('s3', f'{host}.202504.01')
+        super().__init__(UNIQUE_STORE_NAME, f'{host}.202504.01')
         self.s3 = boto3_client
         self.bucket_name = bucket_name
 
@@ -90,6 +95,12 @@ class S3Store(BaseAdapter):
     def put(
         self, data: BytesIO, destination: str, mimetype: str | None = None, **kwargs
     ):
+        assert isinstance(data, BytesIO), (
+            'data argument needs to be a type `BytesIO`. instead got {}'.format(
+                type(data)
+            )
+        )
+
         data.seek(0)
         response = self.s3.put_object(
             ACL='private',

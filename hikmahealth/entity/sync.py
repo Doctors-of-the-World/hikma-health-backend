@@ -103,6 +103,13 @@ class SyncToServer(ISyncPush[Connection]):
                 for action, data in deltadata:
                     transformed_data = data
 
+                    # Validate UUID fields
+                    if isinstance(data, dict) and 'id' in data and not data['id']:
+                        print(f'Action: {action}, Data: {data}')
+                        raise ValueError(f"Invalid UUID: empty string not allowed for id field")
+
+                    # print(f'Action: {action}, Data: {data}')
+
                     try:
                         tdata = cls.transform_delta(ctx, action, data)
                         if tdata is None:

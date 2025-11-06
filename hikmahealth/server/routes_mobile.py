@@ -12,7 +12,7 @@ from hikmahealth.server.client.keeper import get_keeper
 from hikmahealth.server.client.resources import (
     ResourceManager,
     ResourceNotFound,
-    ResourceStoreTypeMismatch,
+    ResourceStoreTypeMismatchError,
     get_resource_manager,
 )
 from hikmahealth.server.helpers import web as webhelper
@@ -218,7 +218,7 @@ def sync_v2_push():
 @api.route('/forms/resources', methods=['PUT'])
 def put_resource_to_store():
     # # authenticating the
-    # _get_authenticated_user_from_request(request)
+    _get_authenticated_user_from_request(request)
     # NOTE: might instead throw a WebError here
     rmgr = get_resource_manager()
 
@@ -228,8 +228,8 @@ def put_resource_to_store():
     resources = []
     for name, k in request.files.items():
         resources.append((
-            k.stream,
-            lambda id: f'forms_resources/{id}',
+            BytesIO(k.stream.read()),
+            lambda id: f'hh_forms_resources/{id}',
             k.mimetype,
         ))
 
@@ -241,7 +241,7 @@ def put_resource_to_store():
 @api.route('/forms/resources/<rid>', methods=['GET'])
 def get_resource_from_store(rid: str):
     # # authenticating the
-    # _get_authenticated_user_from_request(request)
+    _get_authenticated_user_from_request(request)
     rmgr = get_resource_manager()
 
     if rmgr is None:
@@ -250,7 +250,7 @@ def get_resource_from_store(rid: str):
     try:
         result = rmgr.get_resource(rid)
         return send_file(result['Body'], download_name=rid, mimetype=result['Mimetype'])
-    except ResourceNotFound | ResourceStoreTypeMismatch as err:
+    except (ResourceNotFound, ResourceStoreTypeMismatchError):
         return jsonify({'ok': False, 'message': 'Resource not found'}), 404
 
 

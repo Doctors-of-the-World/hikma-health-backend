@@ -2,20 +2,21 @@ from dataclasses import dataclass
 import dataclasses
 from io import BytesIO
 from google.cloud import storage
-from werkzeug.datastructures import FileStorage
 
 from hikmahealth.server.client.keeper import Keeper
 from hikmahealth.storage.objects import PutOutput
-from .base import BaseAdapter
-
-import os
+from .base import BaseAdapter, BaseConfig
 
 
 # NOTE: might change this into a usuful function
 @dataclass
-class StoreConfig:
+class StoreConfig(BaseConfig):
     GCP_SERVICE_ACCOUNT: dict
     GCP_BUCKET_NAME: str | None = None
+
+    @property
+    def secret_fields(self):
+        return ['GCP_SERVICE_ACCOUNT']
 
 
 # Default name of bucket expected to be in the GCP cloud storage
@@ -49,11 +50,15 @@ def initialize_store_config_from_keeper(kp: Keeper):
     return StoreConfig(**config)
 
 
+UNIQUE_STORE_NAME = 'gcp'
+"""Name to uniquely identify the adapter associated with the storage"""
+
+
 class GCPStore(BaseAdapter):
     """Adapter that makes storage possible on the Google Cloud Platform (GCP) Cloud Storage"""
 
     def __init__(self, bucket: storage.Bucket):
-        super().__init__('gcp', '202503.01')
+        super().__init__(UNIQUE_STORE_NAME, '202503.01')
         self.bucket = bucket
 
     def download_as_bytes(self, uri: str, *args, **kwargs) -> BytesIO:
@@ -69,8 +74,11 @@ class GCPStore(BaseAdapter):
         **kwargs,
     ):
         """saves the data to a destination"""
-        assert isinstance(
-            data, BytesIO), 'data argument needs to be a type `BytesIO`'
+        assert isinstance(data, BytesIO), (
+            'data argument needs to be a type `BytesIO`. instead got {}'.format(
+                type(data)
+            )
+        )
 
         # check if destination hasa a file
         blob = self.bucket.blob(destination)
